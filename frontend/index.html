@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Chat with your documents using a lightweight RAG app." />
+  <title>DocChat RAG</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">D</div>
+        <div><strong>DocChat</strong><span>Lightweight RAG</span></div>
+      </div>
+      <button class="new-chat" id="newChatBtn">＋ New chat</button>
+
+      <section class="side-section">
+        <div class="side-title">Documents</div>
+        <label class="upload-box" id="uploadBox">
+          <input type="file" id="fileInput" accept=".pdf,.docx,.pptx,.txt,.md" hidden />
+          <span class="upload-icon">↑</span>
+          <span><b>Upload document</b><small>PDF · DOCX · PPTX · TXT · MD</small></span>
+        </label>
+        <div id="documentsList" class="documents-list"></div>
+      </section>
+
+      <section class="side-section chats-section">
+        <div class="side-title">Recent chats</div>
+        <div id="chatsList" class="chats-list"></div>
+      </section>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        <span>Lightweight mode</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">DOCUMENT ASSISTANT</div>
+          <h1 id="chatTitle">New document chat</h1>
+        </div>
+        <div class="top-actions">
+          <button class="ghost-btn" id="summaryBtn" disabled>✦ Summarize</button>
+          <button class="ghost-btn danger" id="clearBtn" disabled>Clear</button>
+        </div>
+      </header>
+
+      <div id="notice" class="notice hidden"></div>
+      <section id="emptyState" class="empty-state">
+        <div class="empty-icon">✦</div>
+        <h2>Chat with a document</h2>
+        <p>Upload a document, then ask questions about its contents. Answers are grounded in retrieved document chunks.</p>
+        <div class="quick-grid">
+          <button data-prompt="Summarize the main ideas of this document.">Summarize the main ideas</button>
+          <button data-prompt="What are the most important facts I should remember?">Key facts to remember</button>
+          <button data-prompt="Explain the most important concept in simple words.">Explain simply</button>
+          <button data-prompt="What conclusions or recommendations does the document make?">Find conclusions</button>
+        </div>
+      </section>
+
+      <section id="messages" class="messages hidden"></section>
+
+      <form id="composer" class="composer">
+        <textarea id="messageInput" rows="1" placeholder="Upload a document to start…" disabled></textarea>
+        <button id="sendBtn" type="submit" aria-label="Send" disabled>➤</button>
+      </form>
+      <div class="composer-hint">Enter to send · Shift+Enter for a new line</div>
+    </main>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loader-card"><div class="spinner"></div><span id="loadingText">Working…</span></div>
+  </div>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>

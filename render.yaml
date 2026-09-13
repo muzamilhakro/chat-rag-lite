@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: chat-rag-lite
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn backend.app:app --bind 0.0.0.0:$PORT
+    plan: free
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
+      - key: DATABASE_URL
+        sync: false
+      - key: MAX_FILE_MB
+        value: "15"
+      - key: MAX_CHUNKS_TO_SEND
+        value: "8"
