@@ -426,6 +426,48 @@ def clear_chat(chat_id):
     else: c=sqlite_conn(); c.execute("DELETE FROM messages WHERE chat_id=?",(chat_id,)); c.commit(); c.close()
     return jsonify({"ok":True})
 
+@app.delete("/api/chats/<chat_id>")
+def delete_chat(chat_id):
+    sid = ensure_session()
+
+    # Make sure this chat belongs to the current user's session
+    chat = get_chat(sid, chat_id)
+
+    if not chat:
+        return jsonify({"error": "Chat not found."}), 404
+
+    try:
+        if is_postgres():
+            # Messages are automatically deleted because
+            # chat_id has ON DELETE CASCADE
+            pg_execute(
+                "DELETE FROM chats WHERE id=%s AND session_id=%s",
+                (chat_id, sid)
+            )
+        else:
+            c = sqlite_conn()
+
+            # Make sure SQLite enforces foreign-key cascade
+            c.execute("PRAGMA foreign_keys=ON")
+
+            c.execute(
+                "DELETE FROM chats WHERE id=? AND session_id=?",
+                (chat_id, sid)
+            )
+
+            c.commit()
+            c.close()
+
+        return jsonify({
+            "ok": True,
+            "deleted_chat_id": chat_id
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e)
+        }), 500
+
 @app.delete("/api/documents/<document_id>")
 def delete_document(document_id):
     sid=ensure_session(); doc=get_document(sid,document_id)
