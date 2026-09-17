@@ -18,11 +18,19 @@
 
       <section class="side-section">
         <div class="side-title">Documents</div>
-        <label class="upload-box" id="uploadBox">
-          <input type="file" id="fileInput" accept=".pdf,.docx,.pptx,.txt,.md" hidden />
-          <span class="upload-icon">↑</span>
-          <span><b>Upload document</b><small>PDF · DOCX · PPTX · TXT · MD</small></span>
-        </label>
+<label class="upload-box" id="uploadBox" for="fileInput">
+  <input
+    type="file"
+    id="fileInput"
+    accept=".pdf,.docx,.pptx,.txt,.md"
+    hidden
+  />
+  <span class="upload-icon">↑</span>
+  <span>
+    <b>Upload document</b>
+    <small>PDF · DOCX · PPTX · TXT · MD</small>
+  </span>
+</label>
         <div id="documentsList" class="documents-list"></div>
       </section>
 
