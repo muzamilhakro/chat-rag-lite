@@ -1,112 +1,301 @@
 # Chat RAG Lite
 
-A lightweight document-chat website inspired by the SAGE-style stack: vanilla HTML/CSS/JavaScript + Python Flask. Upload PDF, DOCX, PPTX, TXT or Markdown files, generate a summary, and ask grounded questions about the document.
+A lightweight **document RAG chatbot** built with vanilla HTML/CSS/JavaScript and Python Flask.
 
-## What makes it lightweight
+Upload a document, generate an AI summary, and ask questions that are answered using content retrieved from the uploaded document.
 
-- No React, Next.js, Tailwind, LangChain, FAISS, or local embedding model.
-- Text extraction uses PyMuPDF, python-docx, and python-pptx.
-- Retrieval uses a small local lexical scorer over chunks instead of downloading a large embedding model.
-- Groq handles summarization and answer generation through its OpenAI-compatible API.
-- SQLite works locally; Supabase Postgres can be used in production.
+## ✨ Features
 
-## Features
+- 📄 Upload **PDF, DOCX, PPTX, TXT, and Markdown** files
+- 🧠 Automatic text extraction and chunking
+- 📝 AI-generated document summaries
+- 💬 Ask questions about uploaded documents
+- 🔎 Lightweight RAG retrieval with source-chunk references
+- 📚 Support for multiple documents
+- 🗂️ Chat history stored in SQLite
+- 🗑️ Delete documents and clear conversations
+- 🌙 Modern responsive dark interface
+- 🔐 Groq API key stays on the backend
+- ⚡ No React, LangChain, FAISS, or large local AI models
 
-- Upload PDF/DOCX/PPTX/TXT/MD
-- Automatic text extraction and chunking
-- Document summary
-- RAG-style Q&A with source-chunk references
-- Chat history stored in the database
-- Multiple uploaded documents
-- Delete documents
-- Clear chat
-- Responsive dark UI
-- No API key shipped to the browser
-- Local SQLite fallback
+## 🛠️ Tech Stack
 
-## Local setup (Windows PowerShell)
+### Frontend
+
+- HTML5
+- CSS3
+- Vanilla JavaScript
+
+### Backend
+
+- Python 3.11+
+- Flask
+- Gunicorn
+
+### Document Processing
+
+- PyMuPDF — PDF text extraction
+- python-docx — DOCX text extraction
+- python-pptx — PPTX text extraction
+
+### AI
+
+- Groq API
+- OpenAI-compatible chat completions API
+
+### Database
+
+- SQLite
+
+## 🧩 How It Works
+
+```text
+                  Upload document
+                         │
+                         ▼
+                Extract document text
+                         │
+                         ▼
+                    Split into chunks
+                         │
+                         ▼
+                 Store chunks in SQLite
+                         │
+                         ▼
+                  User asks a question
+                         │
+                         ▼
+                Retrieve relevant chunks
+                         │
+                         ▼
+                Send context to Groq LLM
+                         │
+                         ▼
+                  Grounded AI response
+```
+
+The project intentionally uses a small lexical retrieval system instead of a heavy vector database or local embedding model. This keeps installation, hosting, and maintenance simple.
+
+## 📁 Project Structure
+
+```text
+chat-rag-lite/
+│
+├── backend/
+│   ├── __init__.py
+│   ├── app.py
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── index.html
+│   └── assets/
+│       ├── app.js
+│       └── style.css
+│
+├── sql/
+│   └── schema.sql
+│
+├── .env.example
+├── .gitignore
+├── Procfile
+└── README.md
+```
+
+## 🚀 Run Locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/chat-rag-lite.git
+cd chat-rag-lite
+```
+
+### 2. Create a virtual environment
+
+#### Windows PowerShell
 
 ```powershell
-cd "C:\path\to\chat-rag-lite"
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+#### macOS / Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
 python -m pip install --upgrade pip
-pip install -r backend\requirements.txt
+pip install -r backend/requirements.txt
+```
+
+### 4. Configure Groq
+
+Create a Groq API key and set it as an environment variable.
+
+#### Windows PowerShell
+
+```powershell
 $env:GROQ_API_KEY="YOUR_GROQ_API_KEY"
+```
+
+#### macOS / Linux
+
+```bash
+export GROQ_API_KEY="YOUR_GROQ_API_KEY"
+```
+
+The API key must remain on the server and should never be placed in frontend JavaScript.
+
+### 5. Start the application
+
+```bash
 python -m backend.app
 ```
 
-Open http://127.0.0.1:5000
+Open:
 
-For local development, SQLite is created automatically as `data.db` and is ignored by Git.
-
-## GitHub
-
-```powershell
-git init
-git add .
-git commit -m "Initial Chat RAG Lite project"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/chat-rag-lite.git
-git push -u origin main
+```text
+http://127.0.0.1:5000
 ```
 
-Never commit a real `.env` or API key. Use `.env.example` only as a template.
+## 🔑 Environment Variables
 
-## Free production deployment
+Copy `.env.example` as a starting point when using an environment-variable based setup.
 
-Recommended simple architecture:
+```text
+GROQ_API_KEY=your_key_here
+GROQ_MODEL=openai/gpt-oss-20b
+DATABASE_URL=
+MAX_FILE_MB=15
+MAX_CHUNKS_TO_SEND=8
+```
 
-Browser -> Render Flask web service -> Supabase Postgres + Groq API
+`DATABASE_URL` is optional. When it is not set, the application uses local SQLite.
 
-Render is used for the Flask app. Supabase provides the persistent Postgres database. The raw uploaded files are not stored permanently by this version; only extracted text chunks are stored in the database. This avoids needing a separate object-storage service.
+## 🗄️ Database
 
-### Supabase
+The application uses SQLite by default and creates the database automatically.
 
-1. Create a Supabase project.
-2. Open Project Settings -> Database.
-3. Copy a Postgres connection string.
-4. Put it into Render as `DATABASE_URL`.
-5. The app creates the required tables automatically on startup.
+Main tables:
 
-### Render
+- `documents` — uploaded document metadata
+- `chunks` — extracted document chunks used for retrieval
+- `chats` — conversations
+- `messages` — chat messages
 
-1. Create a Render account.
-2. New -> Web Service.
-3. Connect your GitHub repo.
-4. Build command: `pip install -r backend/requirements.txt`
-5. Start command: `gunicorn backend.app:app --bind 0.0.0.0:$PORT`
-6. Choose the Free instance while prototyping.
-7. Add environment variables:
-   - `GROQ_API_KEY` = your Groq API key
-   - `GROQ_MODEL` = `openai/gpt-oss-20b`
-   - `DATABASE_URL` = your Supabase Postgres connection string
-   - `MAX_FILE_MB` = `15`
-   - `MAX_CHUNKS_TO_SEND` = `8`
-8. Deploy.
+The database file is local and should not be committed to GitHub.
 
-Render will give the site an `onrender.com` URL.
+## 🔎 RAG Retrieval
 
-## Important free-hosting limitations
+The current retrieval pipeline is deliberately lightweight:
 
-Render free web services sleep after 15 minutes without inbound traffic and the local filesystem is ephemeral, so do not rely on `data.db` in production. Supabase is used for persistent data. Supabase's free tier is intended for hobby projects and currently includes a 500 MB database, with projects pausing after one week of inactivity.
+1. Extract text from the document.
+2. Split the text into overlapping chunks.
+3. Store chunks in SQLite.
+4. Score chunks against the user's question using token/phrase matching.
+5. Select the most relevant chunks.
+6. Send those chunks and recent conversation context to the Groq model.
+7. Ask the model to answer using the supplied document context.
 
-## AI provider
+This approach avoids downloading a local embedding model and keeps the application suitable for small free hosting environments.
 
-The backend uses Groq's OpenAI-compatible endpoint. The default model is `openai/gpt-oss-20b`. Keep the key only in the server environment, never in frontend JavaScript.
+## 📝 Document Summarization
 
-## Current RAG behavior
+When a document is uploaded, the backend can generate an AI summary from extracted document content.
 
-1. Extract text from the uploaded document.
-2. Split text into overlapping chunks.
-3. Store chunks in the database.
-4. Score chunks against the user's question using lightweight token overlap and phrase matching.
-5. Send only the best few chunks plus recent chat messages to the LLM.
-6. Ask the model to answer only from that context and cite source chunks.
+The summary is designed around sections such as:
 
-## Known limitations
+- Overview
+- Key points
+- Important details
+- One-line takeaway
+
+## ⚙️ Configuration
+
+Default limits can be adjusted through environment variables.
+
+```text
+MAX_FILE_MB=15
+MAX_CHUNKS_TO_SEND=8
+```
+
+Increase these carefully on low-resource hosting because larger documents and larger context windows require more memory and API usage.
+
+## ⚠️ Current Limitations
 
 - Scanned/image-only PDFs are not OCR'd.
-- Retrieval is lexical rather than embedding-based, so paraphrased questions may sometimes retrieve less relevant chunks.
-- One server instance is the target for this free deployment.
-- This version deliberately avoids user accounts; a random browser session cookie separates users. For a public multi-user production app, add Supabase Auth before collecting private documents.
+- Retrieval is lexical rather than embedding-based, so highly paraphrased questions may sometimes retrieve weaker context.
+- The current project is designed for lightweight usage rather than very large document collections.
+- Authentication is not included in the current version.
+- SQLite is best suited to small deployments and single-instance use.
+
+## 🔮 Possible Future Improvements
+
+- Semantic embeddings for better retrieval
+- Hybrid lexical + vector search
+- OCR for scanned PDFs
+- User authentication and private document collections
+- Streaming AI responses
+- Better document citation and page/slide references
+- Saved flashcards and quizzes from documents
+- Document folders and search
+- More advanced conversation management
+
+## 🔐 Security Notes
+
+Never commit secrets to GitHub.
+
+Do **not** put your real Groq API key inside:
+
+```text
+frontend/assets/app.js
+frontend/index.html
+```
+
+Use environment variables on the backend instead.
+
+Also make sure `.env` and generated database files remain ignored by Git.
+
+## 📌 Why This Project Is Lightweight
+
+This project intentionally avoids a large framework and heavy AI pipeline.
+
+Instead of:
+
+```text
+React
+Next.js
+LangChain
+Vector database
+Local embedding model
+Docker
+```
+
+it uses:
+
+```text
+Vanilla HTML/CSS/JavaScript
+          +
+       Flask
+          +
+   Lightweight RAG
+          +
+       SQLite
+          +
+        Groq
+```
+
+That makes it easier to understand, run locally, modify, and deploy on limited resources.
+
+## 📜 License
+
+Add the license you want to use for your project.
+
+---
+
+Built as a lightweight academic/document assistant inspired by the SAGE-style offline-friendly architecture.
